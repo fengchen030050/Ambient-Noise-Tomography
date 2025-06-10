@@ -1,0 +1,51 @@
+function [] = plotVphase(cross_corr,StaDist)
+%  
+%   cross_corr 是一条互相关曲线
+%   StaDist 是台站间距离
+%       
+%   本函数用于画相速度频散图
+%   问题1：滤波器计算速度需要优化
+%   
+
+Fs = 1;     %   采样频率
+TPoint = 3:0.5:50;  % 定义周期点
+VPoint = 2:0.1:5; 
+N = length(TPoint);     % 计算周期点的数量
+filtered_signals = zeros(length(VPoint), N);     %  初始化存储滤波后信号的矩阵
+
+% % 1. 转换为解析信号
+% x_analytic = hilbert(cross_corr);             % 希尔伯特变换获得解析信号
+% % 2. 相位调整
+% x_shifted = x_analytic .* exp(1i*-pi/4);
+% 
+% % 3. 转换回实信号（可选）
+% cross_corr = real(x_shifted);  
+t = 1 : 1 : length(cross_corr);     
+
+
+for i = 1:N  
+    f0 = 1 / TPoint(i); % 中心频率
+    d = designfilt('bandpassfir', 'FilterOrder', 60, ...
+                   'CutoffFrequency1', f0 - 0.01, 'CutoffFrequency2', f0 + 0.01, ...
+                   'SampleRate', Fs);
+    filtered_signal = filtfilt(d, cross_corr);      %   零相位滤波
+    TravPtV = StaDist./(t - TPoint(i)/8);
+    TravPtV(isinf(TravPtV)) = 1000-i;
+    filtered_signal = interp1(TravPtV, filtered_signal, VPoint, 'spline');
+    filtered_signal = fliplr(filtered_signal ./ max(abs(filtered_signal)));   %  倒转，归一化振幅\
+    filtered_signals(:, i) = filtered_signal;   %   存储信号
+end
+
+
+figure;
+imagesc(TPoint,VPoint, filtered_signals);
+xlabel('周期(s)');
+ylabel('相速度(km/s)');
+title('FTAN时频分析图');
+xlim([5 50]);
+ylim([2 5]);
+colorbar; % 添加颜色条以显示数值范围
+axis xy;  % 确保坐标轴方向正确
+
+end
+

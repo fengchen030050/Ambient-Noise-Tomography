@@ -5,7 +5,7 @@
 
 原始采集数据采用的是EGFAnalysisTimeFreq项目中的数据，可以在github中搜索到。
 
-This project shares some codes when I was working on the ambient noise tomography. Adding wavelet transform denoising in the cross-correlation signal can improve the period range of dispersion curve extraction:
+This project shares some codes when I was working on the ambient noise tomography. Adding wavelet transform denoising in the cross-correlation signal can improve the period range of dispersion curve extraction and imaging resolution:
 
 - "Functions" contains the functions that the script needs to call
 - "Scripts" contains the code pages that call functions to run these data
